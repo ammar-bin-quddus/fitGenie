@@ -13,9 +13,9 @@
     "typecheck": "tsc --noEmit",
     "postinstall": "prisma generate",
     "deploy:check": "npm run lint && npm run typecheck && npm run build",
-    "prisma:deploy": "dotenv -e .env.local -- prisma migrate deploy",
-    "prisma:generate": "dotenv -e .env.local -- prisma generate",
-    "prisma:migrate": "dotenv -e .env.local -- prisma migrate dev"
+    "prisma:deploy": "dotenv -e .env -- prisma migrate deploy",
+    "prisma:generate": "dotenv -e .env -- prisma generate",
+    "prisma:migrate": "dotenv -e .env -- prisma migrate dev"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",
