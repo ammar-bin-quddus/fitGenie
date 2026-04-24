@@ -37,7 +37,8 @@ export async function registerUser(
 
     return { success: true, data: { id: user.id } };
   } catch (error) {
-    console.error("[REGISTER_USER_ERROR]", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("[REGISTER_USER_ERROR]", errorMessage, error);
     return { success: false, error: "Unable to create your account right now." };
   }
 }
