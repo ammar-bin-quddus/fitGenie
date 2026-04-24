@@ -67,6 +67,7 @@ export default function Home() {
                   alt="FitGenie training companion"
                   fill
                   priority
+                  unoptimized
                   className="object-cover object-center"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/18 via-transparent to-transparent" />

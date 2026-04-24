@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FitGenie AI
 
-## Getting Started
+FitGenie is a Next.js 16 app for AI-assisted workouts, nutrition plans, progress tracking, and community features. It uses the App Router, Auth.js, Prisma, PostgreSQL, and Gemini.
 
-First, run the development server:
+## Stack
+
+- Next.js 16.2.4
+- React 19
+- Prisma + PostgreSQL
+- Auth.js v5 beta
+- Gemini via `@google/genai`
+
+## Requirements
+
+- Node.js `20.9.0` or newer
+- A PostgreSQL database
+- A `NEXTAUTH_SECRET`
+- A `GEMINI_API_KEY` for AI features
+
+## Environment Variables
+
+Copy `.env.example` to `.env.local` for local development.
+
+Required:
+
+- `DATABASE_URL`
+- `NEXTAUTH_SECRET`
+- `NEXTAUTH_URL`
+- `GEMINI_API_KEY`
+
+Optional:
+
+- `GITHUB_ID`
+- `GITHUB_SECRET`
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+
+## Local Development
 
 ```bash
+npm install
+npm run prisma:migrate
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Deployment
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+This repo is configured for production builds with webpack because the default Turbopack build path was hitting Windows filesystem lock issues in this workspace. The build is verified with:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run deploy:check
+```
 
-## Learn More
+Recommended production flow:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm install
+npm run prisma:deploy
+npm run build
+npm run start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Production Checklist
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Set production environment variables, especially:
+   - `DATABASE_URL`
+   - `NEXTAUTH_SECRET`
+   - `NEXTAUTH_URL` set to your real public origin
+   - `GEMINI_API_KEY`
+2. Run database migrations with `npm run prisma:deploy`.
+3. Build with `npm run build`.
+4. Start with `npm run start`.
 
-## Deploy on Vercel
+## Notes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `next.config.ts` uses `output: "standalone"` to make container and VM deployment easier.
+- `postinstall` runs `prisma generate`, so fresh installs generate the Prisma client automatically.
+- Social login providers are optional and only activate when their credentials are present.
