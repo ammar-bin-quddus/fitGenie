@@ -1,0 +1,234 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(cuid())
+  name         String?
+  email        String        @unique
+  password     String?
+  image        String?
+  role         Role          @default(USER)
+  createdAt    DateTime      @default(now())
+  profile      Profile?
+  workoutPlans WorkoutPlan[]
+  mealPlans    MealPlan[]
+  progressLogs ProgressLog[]
+  posts        Post[]
+  postLikes    PostLike[]
+  comments     Comment[]
+  accounts     Account[]
+  sessions     Session[]
+}
+
+model Profile {
+  id                String         @id @default(cuid())
+  userId            String         @unique
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  age               Int?
+  gender            String?
+  height            Float?
+  weight            Float?
+  fitnessGoal       FitnessGoal?
+  activityLevel     ActivityLevel?
+  dietaryPreference String?
+  medicalNotes      String?
+  progressPhotoUrl  String?
+  updatedAt         DateTime       @updatedAt
+}
+
+model WorkoutPlan {
+  id             String        @id @default(cuid())
+  userId         String
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title          String
+  description    String?
+  goal           FitnessGoal
+  level          FitnessLevel
+  durationWeeks  Int
+  workoutType    WorkoutType
+  isAIGenerated  Boolean       @default(false)
+  daysPerWeek    Int           @default(3)
+  sessionMinutes Int           @default(45)
+  equipment      String?
+  exercises      Exercise[]
+  createdAt      DateTime      @default(now())
+}
+
+model Exercise {
+  id            String      @id @default(cuid())
+  workoutPlanId String
+  workoutPlan   WorkoutPlan @relation(fields: [workoutPlanId], references: [id], onDelete: Cascade)
+  name          String
+  sets          Int
+  reps          String
+  restSeconds   Int
+  muscleGroup   String
+  instructions  String?
+  day           Int
+}
+
+model MealPlan {
+  id            String        @id @default(cuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title         String
+  calories      Int?
+  isAIGenerated Boolean       @default(false)
+  meals         Meal[]
+  groceryList   GroceryItem[]
+  createdAt     DateTime      @default(now())
+}
+
+model Meal {
+  id          String    @id @default(cuid())
+  mealPlanId  String
+  mealPlan    MealPlan  @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  name        String
+  mealType    MealType
+  ingredients String[]
+  calories    Int?
+  protein     Float?
+  carbs       Float?
+  fat         Float?
+  recipe      String?
+  dayNumber   Int
+}
+
+model GroceryItem {
+  id         String   @id @default(cuid())
+  mealPlanId String
+  mealPlan   MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  name       String
+  quantity   String
+  category   String
+}
+
+model ProgressLog {
+  id       String   @id @default(cuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date     DateTime @default(now())
+  weight   Float?
+  bmi      Float?
+  chest    Float?
+  waist    Float?
+  hips     Float?
+  arms     Float?
+  notes    String?
+  photoUrl String?
+}
+
+model Post {
+  id        String       @id @default(cuid())
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category  PostCategory @default(ALL)
+  content   String
+  imageUrl  String?
+  likes     Int          @default(0)
+  createdAt DateTime     @default(now())
+  postLikes PostLike[]
+  comments  Comment[]
+}
+
+model PostLike {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content   String
+  createdAt DateTime @default(now())
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum FitnessGoal {
+  WEIGHT_LOSS
+  MUSCLE_GAIN
+  ENDURANCE
+  FLEXIBILITY
+  GENERAL_FITNESS
+  MAINTENANCE
+}
+
+enum ActivityLevel {
+  SEDENTARY
+  LIGHTLY_ACTIVE
+  MODERATELY_ACTIVE
+  VERY_ACTIVE
+  EXTRA_ACTIVE
+}
+
+enum FitnessLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum WorkoutType {
+  HOME
+  GYM
+  OUTDOOR
+  HYBRID
+}
+
+enum MealType {
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACK
+}
+
+enum PostCategory {
+  ALL
+  WORKOUT
+  NUTRITION
+  PROGRESS
+}
